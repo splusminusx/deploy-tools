@@ -1,6 +1,4 @@
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
 from .models import Release
 from datetime import date, timedelta
 
