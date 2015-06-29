@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
 from .models import Release
 from datetime import date, timedelta
 
@@ -15,6 +17,12 @@ def week(request, year, month, day):
         days[release.start_time.date()].append(release)
     max_releases_per_day = max(map(lambda x: len(x), days.values()))
     return render(request, 'week.html', context={
-        'days': days,
+        'releases': days,
+        'days': sorted(days.keys()),
         'max_releases_range': range(0, max_releases_per_day)
     })
+
+
+def index(request):
+    d = date.today()
+    return redirect('week/' + str(d.year) + '/' + str(d.month) + '/' + str(d.day))

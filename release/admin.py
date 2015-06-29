@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Service, Environment, Artifact,  Release
+from .models import ArtifactType, Environment, Artifact,  Release
 
-admin.site.register(Service)
+admin.site.register(ArtifactType)
 admin.site.register(Environment)
 
 
@@ -11,7 +11,7 @@ class ArtifactInline(admin.TabularInline):
 
 
 class ArtifactAdmin(admin.ModelAdmin):
-    list_display = ('service', 'version')
+    list_display = ('type', 'version')
 
 
 class ReleaseAdmin(admin.ModelAdmin):

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <title></title>
+    <title>Deploy Tools</title>
 </head>
 <body>
 <nav class="navbar navbar-inverse">
@@ -17,7 +17,7 @@
 </nav>
 <div class="container">
     <h2 class="sub-header">Release Calendar</h2>
-    <table class="table table-striped">
+    <table class="table table-layout:fixed table-bordered">
         <thead>
         <tr>
         {% load release_extras %}
@@ -29,8 +29,26 @@
         </thead>
         <tbody>
         <tr>
-            {% for day, value in days.items %}
-                <td>{% if value|length > i %}{{ value|index:i }}{% endif %}</td>
+            {% for day in days %}
+                <td>
+                {% with release=releases|index:day %}
+                    {% if release|length %}
+                      {% with r=release|index:i %}
+                        {{ r.name }}<br/><br/>
+                        <b>Environment: </b>{{ r.environment }}<br/>
+                        <b>Manager: </b>{{ r.manager }}<br/>
+                        <b>Start Time: </b>{{ r.start_time }}<br/>
+                        <b>End Time: </b>{{ r.end_time }}<br/>
+                        <b>Artifacts:</b><br/>
+                        <ul>
+                        {% for artifact in r.artifacts.all %}
+                            <li>{{ artifact }}</li>
+                        {% endfor %}
+                        </ul>
+                      {% endwith %}
+                    {% endif %}
+                {% endwith %}
+                </td>
             {% endfor %}
         </tr>
         {% endfor %}

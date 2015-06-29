@@ -5,7 +5,7 @@ from django.db import models
 DEFAULT_MAX_CHAR_FIELD_LENGTH = 256
 
 
-class Service(models.Model):
+class ArtifactType(models.Model):
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     description = models.TextField(blank=True, null=False)
 
@@ -22,11 +22,11 @@ class Environment(models.Model):
 
 
 class Artifact(models.Model):
-    service = models.ForeignKey(Service, blank=False, null=False)
+    type = models.ForeignKey(ArtifactType, blank=False, null=False)
     version = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
 
     def __str__(self):
-        return self.service.name + '@' + self.version
+        return self.type.name + '@' + self.version
 
 
 class Release(models.Model):
@@ -39,4 +39,4 @@ class Release(models.Model):
     description = models.TextField(blank=True, null=False)
 
     def __str__(self):
-        return 'at ' + str(self.start_time) + ' to ' + self.environment.name
+        return self.name
