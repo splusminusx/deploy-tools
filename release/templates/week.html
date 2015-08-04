@@ -37,7 +37,7 @@
             {% for day in days %}
                 <td>
                 {% with release=releases|index:day %}
-                    {% if release|length %}
+                    {% if release|length > i %}
                       {% with r=release|index:i %}
                         {{ r.name }}<br/><br/>
                         <b>Environment: </b>{{ r.environment }}<br/>
