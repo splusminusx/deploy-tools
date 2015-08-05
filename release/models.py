@@ -28,11 +28,30 @@ class Artifact(models.Model):
     def __str__(self):
         return self.type.name + '@' + self.version
 
+    def clean(self):
+        if self.version:
+            self.version = self.version.strip()
+
     class Meta:
         unique_together = ('type', 'version')
 
 
 class Release(models.Model):
+    NEW = 'NW'
+    READY = 'RD'
+    SUCCESSFUL = 'SC'
+    FAILED = 'FL'
+    IN_PROGRESS = 'IP'
+    CANCELED = 'CN'
+    RELEASE_STATUS = (
+        (NEW, 'New'),
+	(READY, 'Ready to deploy'),
+	(SUCCESSFUL, 'Successful'),
+	(FAILED, 'Failed'),
+	(IN_PROGRESS, 'Deploy in progress'),
+	(CANCELED, 'Deploy canceled')
+    )
+
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     manager = models.ForeignKey(User, blank=False, null=False)
     environment = models.ForeignKey(Environment, blank=False, null=False)
@@ -40,6 +59,7 @@ class Release(models.Model):
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     artifacts = models.ManyToManyField(Artifact)
     description = models.TextField(blank=True, null=False)
+    status = models.CharField(max_length=2, choices=RELEASE_STATUS, default=NEW)
 
     def __str__(self):
         return self.name

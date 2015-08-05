@@ -6,7 +6,7 @@ from datetime import date, timedelta
 def week(request, year, month, day):
     start = date(int(year), int(month), int(day))
     end = start + timedelta(7)
-    releases = Release.objects.filter(start_time__range=(start, end)).order_by('start_time')
+    releases = Release.objects.filter(start_time__range=(start, end)).filter(status__in=[Release.NEW, Release.IN_PROGRESS, Release.READY]).order_by('start_time')
     days = {}
     for delta in range(0, 7):
         day = start + timedelta(delta)
