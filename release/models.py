@@ -28,6 +28,9 @@ class Artifact(models.Model):
     def __str__(self):
         return self.type.name + '@' + self.version
 
+    class Meta:
+        unique_together = ('type', 'version')
+
 
 class Release(models.Model):
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
@@ -40,3 +43,4 @@ class Release(models.Model):
 
     def __str__(self):
         return self.name
+
