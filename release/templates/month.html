@@ -3,19 +3,15 @@
 {% block content %}
     <h2 class="sub-header">Release Calendar</h2>
     <table class="table table-bordered">
-        <thead>
-        <tr>
         {% load release_extras %}
-        {% for day in days %}
-            <th>{{ day }}</th>
-        {% endfor %}
-        </tr>
-        </thead>
         <tbody>
-        {% for i in max_releases_range %}
+        {% for day in days %}
         <tr>
-            {% for day in days %}
-                <td>
+            <td class="col-md-2">
+                <b>{{ day }}</b>
+            </td>
+            {% for i in max_releases_range %}
+                <td class="col-md-2">
                 {% with release=releases|index:day %}
                     {% if release|length > i %}
                       {% with r=release|index:i %}
