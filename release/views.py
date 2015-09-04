@@ -91,40 +91,43 @@ def fact_list(request):
             artifact__version=version).filter(datetime__range=buf_date)
     elif host and artifact:
         if version:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(artifact__version=version)
+            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
+                artifact__version=version).order_by('-datetime')
         elif buf_date:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(datetime__range=buf_date)
+            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
+                datetime__range=buf_date).order_by('-datetime')
         else:
-            result = result.filter(host=host).filter(artifact__type__name=artifact)
+            result = result.filter(host=host).filter(artifact__type__name=artifact).order_by('-datetime')
     elif version and buf_date:
         if host:
-            result = result.filter(host=host).filter(artifact__version=version).filter(datetime__range=buf_date)
+            result = result.filter(host=host).filter(artifact__version=version).filter(
+                datetime__range=buf_date).order_by('-datetime')
         elif artifact:
             result = result.filter(artifact__type__name=artifact).filter(
-                artifact__version=version).filter(datetime__range=buf_date)
+                artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
         else:
             result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-                artifact__version=version).filter(datetime__range=buf_date)
+                artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
     elif host:
         if version:
-            result = result.filter(host=host).filter(artifact__version=version)
+            result = result.filter(host=host).filter(artifact__version=version).order_by('-datetime')
         elif buf_date:
-            result = result.filter(host=host).filter(datetime__range=buf_date)
+            result = result.filter(host=host).filter(datetime__range=buf_date).order_by('-datetime')
         else:
-            result = result.filter(host=host)
+            result = result.filter(host=host).order_by('-datetime')
     elif artifact:
         if version:
-            result = result.filter(artifact__type__name=artifact).filter(artifact__version=version)
+            result = result.filter(artifact__type__name=artifact).filter(artifact__version=version).order_by('-datetime')
         elif buf_date:
-            result = result.filter(artifact__type__name=artifact).filter(datetime__range=buf_date)
+            result = result.filter(artifact__type__name=artifact).filter(datetime__range=buf_date).order_by('-datetime')
         else:
-            result = result.filter(artifact__type__name=artifact)
+            result = result.filter(artifact__type__name=artifact).order_by('-datetime')
     elif version:
-            result = result.filter(artifact__version=version)
+            result = result.filter(artifact__version=version).order_by('-datetime')
     elif buf_date:
-            result = result.filter(datetime__range=buf_date)
+            result = result.filter(datetime__range=buf_date).order_by('-datetime')
     else:
-        result = result.all()
+        result = result.all().order_by('-datetime')
 
     if result:
         result2 = ''
@@ -156,21 +159,32 @@ def fact_create(request):
         resp1 = ''
     except:
         artifact = ''
-        resp1 = 'artifact not found'
+        resp1 = 'artifact not found '
     try:
         environment = Environment.objects.get(name=body['environment'])
         resp2 = ''
     except:
         environment = ''
-        resp2 = 'environment not found'
-    if artifact and environment:
-        fact = DeploymentFact.objects.create(host=body['host'],
+        resp2 = 'environment not found '
+
+    if body['status'] == 'FL' or body['status'] == 'SC':
+        print(body['status'])
+        status = body['status']
+        resp3 = ''
+    else:
+        print(body['status'])
+        status = ''
+        resp3 = 'status incorrect'
+
+    if artifact and environment and status:
+        fact = DeploymentFact.objects.create(status=status,
+                                             host=body['host'],
                                              artifact=artifact,
                                              environment=environment)
         fact.save()
         return HttpResponse(status=200)
     else:
-        return HttpResponse(resp1 + resp2)
+        return HttpResponse(resp1 + resp2 + resp3)
 
 
 def fact_request(request):

@@ -25,6 +25,7 @@
          <th>date</th>
          <th>artifact</th>
          <th>environment</th>
+         <th>status</th>
          </tr>
         </thead>
         <tbody>
@@ -34,6 +35,7 @@
             <td>{{ fact.datetime }}</td>
             <td>{{ fact.artifact }}</td>
             <td>{{ fact.environment }}</td>
+            <td>{{ fact.get_status_display }}</td>
             </tr>
         {% endfor %}
         </tbody>
