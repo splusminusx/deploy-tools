@@ -1,6 +1,9 @@
-from django.shortcuts import render, redirect
-from .models import Release
-from datetime import date, timedelta
+from django.shortcuts import render,  redirect, HttpResponse
+from .models import Release, DeploymentFact, Artifact, Environment
+from datetime import date, timedelta, datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import json
 
 PLAN_STATUSES = [Release.NEW, Release.IN_PROGRESS, Release.READY]
 HISTORY_STATUSES = [Release.CANCELED, Release.FAILED, Release.SUCCESSFUL]
@@ -11,6 +14,7 @@ MONTH = 'month'
 WEEK = 'week'
 DAYS = { MONTH: 28, WEEK: 7 }
 DEFAULT_MAX_RELEASE_FOR_DAY = 7
+
 
 def period(request, status, period, year, month, day):
     if period == MONTH:
@@ -53,7 +57,121 @@ def period(request, status, period, year, month, day):
         'periods': [WEEK, MONTH]
     })
 
+
 def index(request):
     d = date.today()
     return redirect('plan/week/' + str(d.year) + '/' + str(d.month) + '/' + str(d.day))
 
+
+def fact_list(request):
+
+    result = DeploymentFact.objects
+    if request.method == 'POST':
+        body = request.POST
+        host = body['host']
+        artifact = body['artifact']
+        version = body['version']
+        get_date = body['date']
+        page = 1
+    else:
+        host = request.GET.get('host')
+        artifact = request.GET.get('artifact')
+        version = request.GET.get('version')
+        get_date = request.GET.get('date')
+        page = request.GET.get('page')
+
+    if get_date:
+        buf_date = datetime.strptime(get_date, '%Y-%m-%d')
+        buf_date = (get_date, (buf_date + timedelta(1)))
+    else:
+        buf_date = 0
+
+    if host and artifact and version and buf_date:
+        result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
+            artifact__version=version).filter(datetime__range=buf_date)
+    elif host and artifact:
+        if version:
+            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(artifact__version=version)
+        elif buf_date:
+            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(datetime__range=buf_date)
+        else:
+            result = result.filter(host=host).filter(artifact__type__name=artifact)
+    elif version and buf_date:
+        if host:
+            result = result.filter(host=host).filter(artifact__version=version).filter(datetime__range=buf_date)
+        elif artifact:
+            result = result.filter(artifact__type__name=artifact).filter(
+                artifact__version=version).filter(datetime__range=buf_date)
+        else:
+            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
+                artifact__version=version).filter(datetime__range=buf_date)
+    elif host:
+        if version:
+            result = result.filter(host=host).filter(artifact__version=version)
+        elif buf_date:
+            result = result.filter(host=host).filter(datetime__range=buf_date)
+        else:
+            result = result.filter(host=host)
+    elif artifact:
+        if version:
+            result = result.filter(artifact__type__name=artifact).filter(artifact__version=version)
+        elif buf_date:
+            result = result.filter(artifact__type__name=artifact).filter(datetime__range=buf_date)
+        else:
+            result = result.filter(artifact__type__name=artifact)
+    elif version:
+            result = result.filter(artifact__version=version)
+    elif buf_date:
+            result = result.filter(datetime__range=buf_date)
+    else:
+        result = result.all()
+
+    if result:
+        result2 = ''
+    else:
+        result2 = 'Nothing Found'
+
+    paginator = Paginator(result, 50)
+    try:
+        pagin_result = paginator.page(page)
+    except PageNotAnInteger:
+        pagin_result = paginator.page(1)
+    except EmptyPage:
+        pagin_result = paginator.page(paginator.num_pages)
+    return render(request, 'fact.html', context={
+        'result': pagin_result,
+        'result2': result2,
+        'host': host,
+        'artifact': artifact,
+        'version': version,
+        'date': get_date
+    })
+
+
+@csrf_exempt
+def fact_create(request):
+    body = json.loads(request.body.decode('utf-8'))
+    try:
+        artifact = Artifact.objects.filter(type__name=body['artifact']).filter(version=body['version'])[0]
+        resp1 = ''
+    except:
+        artifact = ''
+        resp1 = 'artifact not found'
+    try:
+        environment = Environment.objects.get(name=body['environment'])
+        resp2 = ''
+    except:
+        environment = ''
+        resp2 = 'environment not found'
+    if artifact and environment:
+        fact = DeploymentFact.objects.create(host=body['host'],
+                                             artifact=artifact,
+                                             environment=environment)
+        fact.save()
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(resp1 + resp2)
+
+
+def fact_request(request):
+    return render(request, 'factrequest.html')

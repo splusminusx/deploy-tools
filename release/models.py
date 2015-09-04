@@ -64,3 +64,21 @@ class Release(models.Model):
     def __str__(self):
         return self.name
 
+
+class DeploymentFact(models.Model):
+    SUCCESSFUL = 'SC'
+    FAILED = 'FL'
+
+    DEPLOY_STATUS = (
+        (SUCCESSFUL, 'Successful'),
+        (FAILED, 'Failed'),
+    )
+
+    status = models.CharField(max_length=2, choices=DEPLOY_STATUS, default=FAILED)
+    host = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, null=False)
+    datetime = models.DateTimeField(auto_now=False, auto_now_add=True)
+    artifact = models.ForeignKey(Artifact)
+    environment = models.ForeignKey(Environment, null=False)
+
+    def __str__(self):
+        return self.host
