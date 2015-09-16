@@ -89,7 +89,7 @@ def fact_list(request):
     else:
         result2 = 'Nothing Found'
 
-    paginator = Paginator(result, 10)
+    paginator = Paginator(result, 100)
     try:
         pagin_result = paginator.page(page)
     except PageNotAnInteger:
