@@ -65,30 +65,52 @@ def index(request):
 
 def fact_list(request):
 
-    result = DeploymentFact.objects
     if request.method == 'POST':
         body = request.POST
-        host = body['host']
-        artifact = body['artifact']
-        version = body['version']
-        get_date = body['date']
         page = 1
     else:
-        host = request.GET.get('host')
-        artifact = request.GET.get('artifact')
-        version = request.GET.get('version')
-        get_date = request.GET.get('date')
-        page = request.GET.get('page')
+        body = request.GET
+        page = body['page']
+
+    host = body['host']
+    artifact = body['artifact']
+    version = body['version']
+    get_date = body['date']
 
     if get_date:
-        buf_date = datetime.strptime(get_date, '%Y-%m-%d')
-        buf_date = (get_date, (buf_date + timedelta(1)))
+        buf_date = (get_date, (datetime.strptime(get_date, '%Y-%m-%d') + timedelta(1)))
     else:
         buf_date = 0
 
+    result = logic(host, artifact, version, buf_date)
+
+    if result:
+        result2 = ''
+    else:
+        result2 = 'Nothing Found'
+
+    paginator = Paginator(result, 10)
+    try:
+        pagin_result = paginator.page(page)
+    except PageNotAnInteger:
+        pagin_result = paginator.page(1)
+    except EmptyPage:
+        pagin_result = paginator.page(paginator.num_pages)
+    return render(request, 'fact.html', context={
+        'result': pagin_result,
+        'result2': result2,
+        'host': host,
+        'artifact': artifact,
+        'version': version,
+        'date': get_date
+    })
+
+
+def logic(host, artifact, version, buf_date):
+    result = DeploymentFact.objects
     if host and artifact and version and buf_date:
         result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-            artifact__version=version).filter(datetime__range=buf_date)
+            artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
     elif host and artifact:
         if version:
             result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
@@ -128,27 +150,7 @@ def fact_list(request):
             result = result.filter(datetime__range=buf_date).order_by('-datetime')
     else:
         result = result.all().order_by('-datetime')
-
-    if result:
-        result2 = ''
-    else:
-        result2 = 'Nothing Found'
-
-    paginator = Paginator(result, 50)
-    try:
-        pagin_result = paginator.page(page)
-    except PageNotAnInteger:
-        pagin_result = paginator.page(1)
-    except EmptyPage:
-        pagin_result = paginator.page(paginator.num_pages)
-    return render(request, 'fact.html', context={
-        'result': pagin_result,
-        'result2': result2,
-        'host': host,
-        'artifact': artifact,
-        'version': version,
-        'date': get_date
-    })
+    return result
 
 
 @csrf_exempt
@@ -187,5 +189,5 @@ def fact_create(request):
         return HttpResponse(resp1 + resp2 + resp3)
 
 
-def fact_request(request):
-    return render(request, 'factrequest.html')
+def fact_show(request):
+    return render(request, 'factshow.html')
