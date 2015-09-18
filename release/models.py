@@ -54,7 +54,7 @@ class Release(models.Model):
 
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     manager = models.ForeignKey(User, blank=False, null=False)
-    environment = models.ForeignKey(Environment, blank=False, null=False)
+    environments = models.ManyToManyField(Environment, blank=False, null=False)
     start_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     artifacts = models.ManyToManyField(Artifact)

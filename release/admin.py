@@ -15,7 +15,7 @@ class ArtifactAdmin(admin.ModelAdmin):
 
 
 class ReleaseAdmin(admin.ModelAdmin):
-    fields = ['name', 'environment', 'start_time', 'end_time', 'status', 'description']
+    fields = ['name', 'environments', 'start_time', 'end_time', 'status', 'description']
     inlines = [ArtifactInline]
     list_display = ('name', 'manager', 'status', 'start_time', 'end_time')
 
