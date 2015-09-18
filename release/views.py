@@ -75,14 +75,13 @@ def fact_list(request):
     host = body['host']
     artifact = body['artifact']
     version = body['version']
-    get_date = body['date']
 
-    if get_date:
-        buf_date = (get_date, (datetime.strptime(get_date, '%Y-%m-%d') + timedelta(1)))
+    if body['date']:
+        buf_date = (body['date'], (datetime.strptime(body['date'], '%Y-%m-%d') + timedelta(1)))
     else:
         buf_date = 0
 
-    result = logic(host, artifact, version, buf_date)
+    result = create_db_request(host, artifact, version, buf_date)
 
     if result:
         result2 = ''
@@ -102,81 +101,74 @@ def fact_list(request):
         'host': host,
         'artifact': artifact,
         'version': version,
-        'date': get_date
+        'date': body['date']
     })
 
 
-def logic(host, artifact, version, buf_date):
-    result = DeploymentFact.objects
-    if host and artifact and version and buf_date:
-        result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-            artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-    elif host and artifact:
-        if version:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-                artifact__version=version).order_by('-datetime')
-        elif buf_date:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-                datetime__range=buf_date).order_by('-datetime')
+def create_db_request(host, artifact, version, buf_date):
+    fact = DeploymentFact.objects
+
+    def check(x):
+        if x:
+            i = '1'
         else:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).order_by('-datetime')
-    elif version and buf_date:
-        if host:
-            result = result.filter(host=host).filter(artifact__version=version).filter(
-                datetime__range=buf_date).order_by('-datetime')
-        elif artifact:
-            result = result.filter(artifact__type__name=artifact).filter(
-                artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-        else:
-            result = result.filter(host=host).filter(artifact__type__name=artifact).filter(
-                artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-    elif host:
-        if version:
-            result = result.filter(host=host).filter(artifact__version=version).order_by('-datetime')
-        elif buf_date:
-            result = result.filter(host=host).filter(datetime__range=buf_date).order_by('-datetime')
-        else:
-            result = result.filter(host=host).order_by('-datetime')
-    elif artifact:
-        if version:
-            result = result.filter(artifact__type__name=artifact).filter(artifact__version=version).order_by('-datetime')
-        elif buf_date:
-            result = result.filter(artifact__type__name=artifact).filter(datetime__range=buf_date).order_by('-datetime')
-        else:
-            result = result.filter(artifact__type__name=artifact).order_by('-datetime')
-    elif version:
-            result = result.filter(artifact__version=version).order_by('-datetime')
-    elif buf_date:
-            result = result.filter(datetime__range=buf_date).order_by('-datetime')
-    else:
-        result = result.all().order_by('-datetime')
-    return result
+            i = '0'
+        return i
+
+    iterator = '' + check(host) + check(artifact) + check(version) + check(buf_date)
+
+    result = {}
+    result['1000'] = lambda: fact.filter(host=host).order_by('-datetime')
+    result['1100'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).order_by('-datetime')
+    result['1110'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
+        artifact__version=version).order_by('-datetime')
+    result['1111'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
+        artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
+    result['1101'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
+        datetime__range=buf_date).order_by('-datetime')
+    result['1010'] = lambda: fact.filter(host=host).filter(artifact__version=version).order_by('-datetime')
+    result['1011'] = lambda: fact.filter(host=host).filter(artifact__version=version).filter(
+        datetime__range=buf_date).order_by('-datetime')
+    result['1001'] = lambda: fact.filter(host=host).filter(datetime__range=buf_date).order_by('-datetime')
+    result['0100'] = lambda: fact.filter(artifact__type__name=artifact).order_by('-datetime')
+    result['0110'] = lambda: fact.filter(artifact__type__name=artifact).filter(
+        artifact__version=version).order_by('-datetime')
+    result['0111'] = lambda: fact.filter(artifact__type__name=artifact).filter(
+        artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
+    result['0101'] = lambda: fact.filter(artifact__type__name=artifact).filter(
+        datetime__range=buf_date).order_by('-datetime')
+    result['0010'] = lambda: fact.filter(artifact__version=version).order_by('-datetime')
+    result['0011'] = lambda: fact.filter(artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
+    result['0001'] = lambda: fact.filter(datetime__range=buf_date).order_by('-datetime')
+    result['0000'] = lambda: fact.all().order_by('-datetime')
+    return result[iterator]()
 
 
 @csrf_exempt
 def fact_create(request):
     body = json.loads(request.body.decode('utf-8'))
+    error_response = ''
     try:
         artifact = Artifact.objects.filter(type__name=body['artifact']).filter(version=body['version'])[0]
-        resp1 = ''
+        error_response += ''
     except:
         artifact = ''
-        resp1 = 'artifact not found '
+        error_response += 'artifact not found \n'
     try:
         environment = Environment.objects.get(name=body['environment'])
-        resp2 = ''
+        error_response += ''
     except:
         environment = ''
-        resp2 = 'environment not found '
+        error_response += 'environment not found \n'
 
     if body['status'] == 'FL' or body['status'] == 'SC':
         print(body['status'])
         status = body['status']
-        resp3 = ''
+        error_response += ''
     else:
         print(body['status'])
         status = ''
-        resp3 = 'status incorrect'
+        error_response += 'status incorrect \n'
 
     if artifact and environment and status:
         fact = DeploymentFact.objects.create(status=status,
@@ -186,7 +178,7 @@ def fact_create(request):
         fact.save()
         return HttpResponse(status=200)
     else:
-        return HttpResponse(resp1 + resp2 + resp3)
+        return HttpResponse(error_response)
 
 
 def fact_show(request):
