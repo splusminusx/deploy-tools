@@ -20,7 +20,12 @@
                     {% if release|length > i %}
                       {% with r=release|index:i %}
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
-                        <b>Environment: </b>{{ r.environment }}<br/>
+                        <b>Environments: </b><br/>
+                        <ul>
+                        {% for environment in r.environments.all %}
+                            <li>{{ environment }}</li>
+                        {% endfor %}
+                        </ul>
                         <b>Manager: </b>{{ r.manager }}<br/>
                         <b>Status: </b>{{ r.get_status_display }}<br/>
                         <b>Start Time: </b>{{ r.start_time }}<br/>
