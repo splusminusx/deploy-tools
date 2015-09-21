@@ -107,41 +107,18 @@ def fact_list(request):
 
 def create_db_request(host, artifact, version, buf_date):
     fact = DeploymentFact.objects
+    if not (host and artifact and version and buf_date):
+        fact = fact.all()
+    if host:
+        fact = fact.filter(host=host)
+    if artifact:
+        fact = fact.filter(artifact__type__name=artifact)
+    if version:
+        fact = fact.filter(artifact__version=version)
+    if buf_date:
+        fact = fact.filter(datetime__range=buf_date)
 
-    def check(x):
-        if x:
-            i = '1'
-        else:
-            i = '0'
-        return i
-
-    iterator = '' + check(host) + check(artifact) + check(version) + check(buf_date)
-
-    result = {}
-    result['1000'] = lambda: fact.filter(host=host).order_by('-datetime')
-    result['1100'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).order_by('-datetime')
-    result['1110'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
-        artifact__version=version).order_by('-datetime')
-    result['1111'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
-        artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-    result['1101'] = lambda: fact.filter(host=host).filter(artifact__type__name=artifact).filter(
-        datetime__range=buf_date).order_by('-datetime')
-    result['1010'] = lambda: fact.filter(host=host).filter(artifact__version=version).order_by('-datetime')
-    result['1011'] = lambda: fact.filter(host=host).filter(artifact__version=version).filter(
-        datetime__range=buf_date).order_by('-datetime')
-    result['1001'] = lambda: fact.filter(host=host).filter(datetime__range=buf_date).order_by('-datetime')
-    result['0100'] = lambda: fact.filter(artifact__type__name=artifact).order_by('-datetime')
-    result['0110'] = lambda: fact.filter(artifact__type__name=artifact).filter(
-        artifact__version=version).order_by('-datetime')
-    result['0111'] = lambda: fact.filter(artifact__type__name=artifact).filter(
-        artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-    result['0101'] = lambda: fact.filter(artifact__type__name=artifact).filter(
-        datetime__range=buf_date).order_by('-datetime')
-    result['0010'] = lambda: fact.filter(artifact__version=version).order_by('-datetime')
-    result['0011'] = lambda: fact.filter(artifact__version=version).filter(datetime__range=buf_date).order_by('-datetime')
-    result['0001'] = lambda: fact.filter(datetime__range=buf_date).order_by('-datetime')
-    result['0000'] = lambda: fact.all().order_by('-datetime')
-    return result[iterator]()
+    return fact
 
 
 @csrf_exempt
