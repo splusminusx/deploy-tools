@@ -84,9 +84,9 @@ def fact_list(request):
     result = create_db_request(host, artifact, version, buf_date)
 
     if result:
-        result2 = ''
+        message = ''
     else:
-        result2 = 'Nothing Found'
+        message = 'Nothing Found'
 
     paginator = Paginator(result, 100)
     try:
@@ -97,7 +97,7 @@ def fact_list(request):
         pagin_result = paginator.page(paginator.num_pages)
     return render(request, 'fact.html', context={
         'result': pagin_result,
-        'result2': result2,
+        'message': message,
         'host': host,
         'artifact': artifact,
         'version': version,
