@@ -40,6 +40,7 @@ class Artifact(models.Model):
 
     class Meta:
         unique_together = ('type', 'version')
+        ordering = ('type', 'version')
 
 
 class Release(models.Model):
