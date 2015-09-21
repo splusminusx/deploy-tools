@@ -12,7 +12,7 @@ class ArtifactInline(admin.TabularInline):
 
 class ArtifactAdmin(admin.ModelAdmin):
     list_display = ('type', 'version')
-    ordering = ('type',)
+    ordering = ('type', 'version')
 
 
 class ReleaseAdmin(admin.ModelAdmin):
