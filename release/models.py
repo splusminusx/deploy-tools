@@ -9,6 +9,9 @@ class ArtifactType(models.Model):
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     description = models.TextField(blank=True, null=False)
 
+    class Meta:
+        ordering = ('name', )
+
     def __str__(self):
         return self.name
 
@@ -16,6 +19,9 @@ class ArtifactType(models.Model):
 class Environment(models.Model):
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     description = models.TextField(blank=True, null=False)
+
+    class Meta:
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -34,6 +40,7 @@ class Artifact(models.Model):
 
     class Meta:
         unique_together = ('type', 'version')
+        ordering = ('type', 'version')
 
 
 class Release(models.Model):
