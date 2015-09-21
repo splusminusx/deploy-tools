@@ -20,6 +20,9 @@ class Environment(models.Model):
     name = models.CharField(max_length=DEFAULT_MAX_CHAR_FIELD_LENGTH, blank=False, null=False)
     description = models.TextField(blank=True, null=False)
 
+    class Meta:
+        ordering = ('name', )
+
     def __str__(self):
         return self.name
 
