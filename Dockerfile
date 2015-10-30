@@ -8,7 +8,7 @@ COPY requirements.txt /deploy-tools/
 COPY manage.py /deploy-tools/
 
 WORKDIR /deploy-tools
-
+RUN mkdir data
 RUN pip install -r requirements.txt
 
 
