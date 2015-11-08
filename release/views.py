@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Release
 from datetime import date, timedelta
+from calendar import monthrange
 
 PLAN_STATUSES = [Release.NEW, Release.IN_PROGRESS, Release.READY]
 HISTORY_STATUSES = [Release.CANCELED, Release.FAILED, Release.SUCCESSFUL]
@@ -14,16 +15,18 @@ DEFAULT_MAX_RELEASE_FOR_DAY = 7
 
 def period(request, status, period, year, month, day):
     if period == MONTH:
-        number_of_days = DAYS[MONTH]
+        number_of_days = monthrange(int(year), int(month))[1]
+        start = date(int(year), int(month), 1)
     else:
         number_of_days = DAYS[WEEK]
+        start = date(int(year), int(month), int(day))
+        start = start - timedelta(start.weekday())
 
     if status == PLAN:
         statuses = PLAN_STATUSES
     else:
         statuses = HISTORY_STATUSES
 
-    start = date(int(year), int(month), int(day))
     end = start + timedelta(number_of_days)
     releases = Release.objects.filter(start_time__range=(start, end)).filter(status__in=statuses).order_by('start_time')
 
@@ -37,6 +40,9 @@ def period(request, status, period, year, month, day):
     max_releases_per_day = max(map(lambda x: len(x), days.values()))
     if period == MONTH and max_releases_per_day < DEFAULT_MAX_RELEASE_FOR_DAY:
         max_releases_per_day = DEFAULT_MAX_RELEASE_FOR_DAY
+
+    if period == MONTH:
+        start = date(int(year), int(month), 15)
 
     return render(request, period + '.html', context={
         'day': day,
