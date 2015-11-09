@@ -23,7 +23,7 @@ def period(request, status, period, year, month, day):
         return return_date
 
     def month_reduce(year, month):
-        if month == 0:
+        if month == 1:
             return_date = date(year - 1, 12, 1)
         else:
             return_date = date(year, month - 1, 1)
