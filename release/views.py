@@ -29,20 +29,16 @@ def period(request, status, period, year, month, day):
             return_date = date(year, month - 1, 1)
         return return_date
 
-    iyear = int(year)
-    imonth = int(month)
-    iday = int(day)
-
+    _date = date(int(year), int(month), int(day))
     if period == MONTH:
-        number_of_days = monthrange(iyear, imonth)[1]
-        start = date(iyear, imonth, 1)
-        prev_period = month_reduce(iyear, imonth)
-        next_period = month_inc(iyear, imonth)
+        number_of_days = monthrange(_date.year, _date.month)[1]
+        start = date(_date.year, _date.month, 1)
+        prev_period = month_reduce(_date.year, _date.month)
+        next_period = month_inc(_date.year, _date.month)
     else:
         number_of_days = DAYS[WEEK]
-        day_of_month = date(iyear, imonth, iday)
-        day_of_week = timedelta(day_of_month.weekday())
-        start = day_of_month - day_of_week
+        day_of_week = timedelta(_date.weekday())
+        start = _date - day_of_week
         prev_period = start - timedelta(number_of_days)
         next_period = start + timedelta(number_of_days)
 

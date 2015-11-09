@@ -7,7 +7,7 @@
         <tbody>
         {% for day in days %}
         <tr>
-            <td class="col-md-2">
+            <td class="col-md-2" style="min-width: 5px">
                 <b>{{ day }}</b>
             </td>
             {% for i in max_releases_range %}
@@ -17,7 +17,7 @@
                       {% with r=release|index:i %}
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
                         <b>Environments: </b><br/>
-                        <ul>
+                        <ul style="overflow-x: scroll">
                         {% for environment in r.environments.all %}
                             <li>{{ environment }}</li>
                         {% endfor %}
