@@ -4,6 +4,7 @@ from datetime import date, timedelta, datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
+from calendar import monthrange
 
 PLAN_STATUSES = [Release.NEW, Release.IN_PROGRESS, Release.READY]
 HISTORY_STATUSES = [Release.CANCELED, Release.FAILED, Release.SUCCESSFUL]
@@ -17,17 +18,39 @@ DEFAULT_MAX_RELEASE_FOR_DAY = 7
 
 
 def period(request, status, period, year, month, day):
+
+    def month_inc(year, month):
+        if month < 12:
+            return_date = date(year, month + 1, 1)
+        else:
+            return_date = date(year + 1, 1, 1)
+        return return_date
+
+    def month_reduce(year, month):
+        if month == 1:
+            return_date = date(year - 1, 12, 1)
+        else:
+            return_date = date(year, month - 1, 1)
+        return return_date
+
+    _date = date(int(year), int(month), int(day))
     if period == MONTH:
-        number_of_days = DAYS[MONTH]
+        number_of_days = monthrange(_date.year, _date.month)[1]
+        start = date(_date.year, _date.month, 1)
+        prev_period = month_reduce(_date.year, _date.month)
+        next_period = month_inc(_date.year, _date.month)
     else:
         number_of_days = DAYS[WEEK]
+        day_of_week = timedelta(_date.weekday())
+        start = _date - day_of_week
+        prev_period = start - timedelta(number_of_days)
+        next_period = start + timedelta(number_of_days)
 
     if status == PLAN:
         statuses = PLAN_STATUSES
     else:
         statuses = HISTORY_STATUSES
 
-    start = date(int(year), int(month), int(day))
     end = start + timedelta(number_of_days)
     releases = Release.objects.filter(start_time__range=(start, end)).filter(status__in=statuses).order_by('start_time')
 
@@ -49,8 +72,8 @@ def period(request, status, period, year, month, day):
         'releases': days,
         'days': sorted(days.keys()),
         'max_releases_range': range(0, max_releases_per_day),
-        'prev_period': start - timedelta(number_of_days),
-        'next_period': start + timedelta(number_of_days),
+        'prev_period': prev_period,
+        'next_period': next_period,
         'status': status,
         'period': period,
         'statuses': [PLAN, HISTORY],
