@@ -11,10 +11,22 @@
                 <b>{{ day }}</b>
             </td>
             {% for i in max_releases_range %}
-                <td class="col-md-2">
                 {% with release=releases|index:day %}
                     {% if release|length > i %}
                       {% with r=release|index:i %}
+                      {% if r.get_status_display == 'Successful' %}
+                        <td class="success">
+                      {% elif r.get_status_display == 'Failed'%}
+                        <td class="danger">
+                      {% elif r.get_status_display == 'Deploy in progress'%}
+                        <td class="active">
+                      {% elif r.get_status_display == 'New'%}
+                        <td class="info">
+                      {% elif r.get_status_display == 'Ready to deploy'%}
+                        <td class="warning">
+                      {% else %}
+                          <td>
+                      {% endif %}
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
                         <b>Environments: </b><br/>
                         <ul>
@@ -32,10 +44,12 @@
                             <li>{{ artifact }}</li>
                         {% endfor %}
                         </ul>
+                      </td>
                       {% endwith %}
+                    {% else %}
+                        <td class="col-md-2"></td>
                     {% endif %}
                 {% endwith %}
-                </td>
             {% endfor %}
         </tr>
         {% endfor %}
