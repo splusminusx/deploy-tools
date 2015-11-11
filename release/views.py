@@ -51,7 +51,6 @@ def period(request, status, period, year, month, day):
     else:
         statuses = HISTORY_STATUSES
 
-    start = date(int(year), int(month), int(day))
     end = start + timedelta(number_of_days)
     releases = Release.objects.filter(start_time__range=(start, end)).filter(status__in=statuses).order_by('start_time')
 
