@@ -3,6 +3,7 @@
 {% block content %}
     <h2 class="sub-header">Release Calendar</h2>
     <table class="table table-bordered">
+    <col width="50px">
         {% load release_extras %}
         <tbody>
         {% for day in days %}
@@ -15,17 +16,17 @@
                     {% if release|length > i %}
                       {% with r=release|index:i %}
                       {% if r.get_status_display == 'Successful' %}
-                        <td class="success">
+                        <td class="success scroll">
                       {% elif r.get_status_display == 'Failed'%}
-                        <td class="danger">
+                        <td class="danger scroll">
                       {% elif r.get_status_display == 'Deploy in progress'%}
-                        <td class="active">
+                        <td class="active scroll">
                       {% elif r.get_status_display == 'New'%}
-                        <td class="info">
+                        <td class="info scroll">
                       {% elif r.get_status_display == 'Ready to deploy'%}
-                        <td class="warning">
+                        <td class="warning scroll">
                       {% else %}
-                          <td>
+                          <td class="scroll">
                       {% endif %}
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
                         <b>Environments: </b><br/>
