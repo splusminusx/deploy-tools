@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {% if result.has_previous %}
+                <a href="?page={{ result.previous_page_number }}&host={{ host }}&artifact={{ artifact }}&version{{ version }}&date={{ date }}"
+                   class="btn btn-default" role="button">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ result.number }} of {{ result.paginator.num_pages }}.
+            </span>
+
+            {% if result.has_next %}
+                <a href="?page={{ result.next_page_number }}&host={{ host }}&artifact={{ artifact }}&version{{ version }}&date={{ date }}"
+                   class="btn btn-default" role="button">next</a>
+            {% endif %}
+        </span>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+         <tr>
+         <th>host</th>
+         <th>date</th>
+         <th>artifact</th>
+         <th>environment</th>
+         <th>status</th>
+         </tr>
+        </thead>
+        <tbody>
+        {% for fact in result %}
+            <tr>
+            <td>{{ fact.host }}</td>
+            <td>{{ fact.datetime }}</td>
+            <td>{{ fact.artifact }}</td>
+            <td>{{ fact.environment }}</td>
+            <td>{{ fact.get_status_display }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div>  {{ message }} </div>
+
+
+{% endblock content %}
