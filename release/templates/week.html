@@ -18,19 +18,7 @@
                 {% with release=releases|index:day %}
                     {% if release|length > i %}
                       {% with r=release|index:i %}
-                      {% if r.get_status_display == 'Successful' %}
-                        <td class="success scroll">
-                      {% elif r.get_status_display == 'Failed'%}
-                        <td class="danger scroll">
-                      {% elif r.get_status_display == 'Deploy in progress'%}
-                        <td class="active scroll">
-                      {% elif r.get_status_display == 'New'%}
-                        <td class="info scroll">
-                      {% elif r.get_status_display == 'Ready to deploy'%}
-                        <td class="warning scroll">
-                      {% else %}
-                          <td class="scroll">
-                      {% endif %}
+                        <td class="col-md-2 {{ r.get_status_display|status_color }} scroll">
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
                         <b>Environments: </b><br/>
                         <ul>
@@ -51,8 +39,7 @@
                         </td>
                       {% endwith %}
                     {% else %}
-                    <td>
-                    </td>
+                    <td class="col-md-2"></td>
                     {% endif %}
                 {% endwith %}
             {% endfor %}
