@@ -52,7 +52,7 @@ def validate_tag(name, version):
                      name + '/releases/tags/' +
                      version, auth=(settings.GIT_LOGIN, settings.GIT_PASSWORD))
     release = r.json()
-    if r.status_code == 200:
+    if not version.find('-') and r.status_code == 200:
         if release['target_commitish'] == 'master':
             validate = True
         else:
