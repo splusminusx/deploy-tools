@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
-
+import requests
+from django.core.exceptions import (ValidationError)
 
 DEFAULT_MAX_CHAR_FIELD_LENGTH = 256
 
@@ -35,12 +36,29 @@ class Artifact(models.Model):
         return self.type.name + '@' + self.version
 
     def clean(self):
+        if not validate_tag(self.type.name, self.version):
+            raise ValidationError("Собрано не с мастера")
         if self.version:
             self.version = self.version.strip()
 
     class Meta:
         unique_together = ('type', 'version')
         ordering = ('type', 'version')
+
+
+def validate_tag(name, version):
+    r = requests.get('https://api.github.com/repos/LiveTex/' +
+                     name + '/releases/tags/' +
+                     version, auth=('', ''))
+    release = r.json()
+    if r.status_code == 200:
+        if release['target_commitish'] == 'master':
+            validate = True
+        else:
+            validate = False
+    else:
+        validate = True
+    return validate
 
 
 class Release(models.Model):
