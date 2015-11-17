@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 import requests
 from django.core.exceptions import (ValidationError)
+from django.conf import settings
 
 DEFAULT_MAX_CHAR_FIELD_LENGTH = 256
 
@@ -49,7 +50,7 @@ class Artifact(models.Model):
 def validate_tag(name, version):
     r = requests.get('https://api.github.com/repos/LiveTex/' +
                      name + '/releases/tags/' +
-                     version, auth=('', ''))
+                     version, auth=(settings.GIT_LOGIN, settings.GIT_PASSWORD))
     release = r.json()
     if r.status_code == 200:
         if release['target_commitish'] == 'master':
