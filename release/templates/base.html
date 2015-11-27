@@ -27,7 +27,7 @@
         <ul class="nav navbar-nav">
             {% for p in periods %}
                 {% for s in statuses %}
-                <li {% if period == p and status == s %}class="active"{% endif %}><a href="/{{ s }}/{{ p }}/{{ year }}/{{ month }}/{{ day }}">{{ p|title }} {{ s|title }}</a></li>
+                <li {% if period == p and status == s and not fact %}class="active"{% endif %}><a href="/{{ s }}/{{ p }}/{{ year }}/{{ month }}/{{ day }}">{{ p|title }} {{ s|title }}</a></li>
                 {% endfor %}
             {% endfor %}
         </ul>
@@ -35,7 +35,7 @@
             <li><a href="/admin">Login</a></li>
         </ul>
         <ul class="nav navbar-nav">
-            <li><a href="/deploymentfact/show">Deploy Fact</a></li>
+            <li {% if fact %}class="active"{% endif %}><a href="/deploymentfact/show/{{ status }}/{{ period }}/{{ year }}/{{ month }}/{{ day }}">Deploy Fact</a></li>
         </ul>
     </div>
 </nav>

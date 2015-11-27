@@ -86,7 +86,7 @@ def index(request):
     return redirect('plan/week/' + str(d.year) + '/' + str(d.month) + '/' + str(d.day))
 
 
-def fact_list(request):
+def fact_list(request, status, period, year, month, day):
 
     if request.method == 'POST':
         body = request.POST
@@ -124,7 +124,15 @@ def fact_list(request):
         'host': host,
         'artifact': artifact,
         'version': version,
-        'date': body['date']
+        'date': body['date'],
+        'day': day,
+        'month': month,
+        'year': year,
+        'status': status,
+        'period': period,
+        'statuses': [PLAN, HISTORY],
+        'periods': [WEEK, MONTH],
+        'fact': True
     })
 
 
@@ -181,5 +189,14 @@ def fact_create(request):
         return HttpResponse(error_response)
 
 
-def fact_show(request):
-    return render(request, 'factshow.html')
+def fact_show(request, status, period, year, month, day):
+    return render(request, 'factshow.html',  context={
+        'day': day,
+        'month': month,
+        'year': year,
+        'status': status,
+        'period': period,
+        'statuses': [PLAN, HISTORY],
+        'periods': [WEEK, MONTH],
+        'fact': True
+    })
