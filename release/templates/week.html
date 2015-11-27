@@ -15,10 +15,10 @@
         {% for i in max_releases_range %}
         <tr>
             {% for day in days %}
-                <td>
                 {% with release=releases|index:day %}
                     {% if release|length > i %}
                       {% with r=release|index:i %}
+                        <td class="col-md-2 {{ r.get_status_display|status_color }} scroll">
                         <a href="/admin/release/release/{{ r.pk }}/">{{ r.name }}</a><br/><br/>
                         <b>Environments: </b><br/>
                         <ul>
@@ -36,10 +36,12 @@
                             <li>{{ artifact }}</li>
                         {% endfor %}
                         </ul>
+                        </td>
                       {% endwith %}
+                    {% else %}
+                    <td class="col-md-2"></td>
                     {% endif %}
                 {% endwith %}
-                </td>
             {% endfor %}
         </tr>
         {% endfor %}
