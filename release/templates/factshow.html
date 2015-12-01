@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="">
-    <form class="form-inline" action="/deploymentfact/list" method="post">
+    <form class="form-inline" action="/deploymentfact/list/{{ status }}/{{ period }}/{{ year }}/{{ month }}/{{ day }}" method="post">
         {% csrf_token %}
         <div class="form-group">
           <input type="text" id="host" class="form-control" name="host" placeholder="host">
